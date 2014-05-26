@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:key="pref_key_server_settings"
+        android:title="@string/pref_server" >
+        <EditTextPreference
+            android:inputType="text"
+            android:key="pref_host"
+            android:summary="@string/pref_host_summ"
+            android:title="@string/pref_host" />
+        <EditTextPreference
+            android:inputType="number"
+            android:key="pref_port"
+            android:summary="@string/pref_port_summ"
+            android:title="@string/pref_port" />
+        <EditTextPreference
+            android:inputType="text"
+            android:key="pref_path"
+            android:summary="@string/pref_path_summ"
+            android:title="@string/pref_path" />
+        <EditTextPreference
+            android:inputType="textUri"
+            android:key="pref_url"
+            android:summary="@string/pref_url_summ"
+            android:title="@string/pref_url" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_cert"
+            android:summary="@string/pref_cert_summ"
+            android:title="@string/pref_valid_cert" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="pref_key_server_settings_auth"
+        android:title="@string/pref_auth" >
+        <EditTextPreference
+            android:inputType="text"
+            android:key="pref_user"
+            android:title="@string/pref_user" />
+        <EditTextPreference
+            android:inputType="textPassword"
+            android:key="pref_passwd"
+            android:title="@string/pref_passwd" />
+    </PreferenceCategory>
+
+    
+
+</PreferenceScreen>
