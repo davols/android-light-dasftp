@@ -4,7 +4,7 @@ Small simple upload picture to sftp server and give direct link in clipboard. Cl
 
 Page: http://davols.github.io/android-light-dasftp
 
-#TODOs
+##TODOs
 - Home should link to shared pictures with thumbnail
 - Being able to have several sites saved
 - Error handling while uploading
@@ -12,7 +12,7 @@ Page: http://davols.github.io/android-light-dasftp
 
 Question is how to make it as simple as possible but also user-friendly and how many functions that should be implemented
 
-Screenshots: 
+##Screenshots:
 
 ![Screenshot-home](http://davols.github.io/android-light-dasftp/images/home.png)
 ![Screenshot-settings](http://davols.github.io/android-light-dasftp/images/settings.png)
