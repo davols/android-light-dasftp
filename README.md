@@ -14,7 +14,7 @@ Question is how to make it as simple as possible but also user-friendly and how 
 
 ##Screenshots:
 
-![Screenshot-home](http://davols.github.io/android-light-dasftp/images/home.png=250x)
+![Screenshot-home](http://davols.github.io/android-light-dasftp/images/home.png =250x)
 ![Screenshot-settings](http://davols.github.io/android-light-dasftp/images/settings.png =250x)
 
 ##License: 
