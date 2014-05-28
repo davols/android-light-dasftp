@@ -9,6 +9,7 @@ Page: http://davols.github.io/android-light-dasftp
 - Being able to have several sites saved
 - Error handling while uploading
 - Icon
+- Auto add tags such as '[img]' in clipboard
 
 Question is how to make it as simple as possible but also user-friendly and how many functions that should be implemented
 
