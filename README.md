@@ -18,6 +18,9 @@ Question is how to make it as simple as possible but also user-friendly and how 
 ![Screenshot-home](http://davols.github.io/android-light-dasftp/images/home.png)
 ![Screenshot-settings](http://davols.github.io/android-light-dasftp/images/settings.png)
 
+##Authors and Contributors
+@olsdav, @bvb (icon), jcraft (sftp library)
+
 ##License: 
 
 dasftp uses Jcrafts jsch library which has a BSD license. Copy of the license can be seen here: http://www.jcraft.com/jsch/LICENSE.txt and project homepage: http://www.jcraft.com/jsch/
