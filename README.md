@@ -19,7 +19,7 @@ Question is how to make it as simple as possible but also user-friendly and how 
 ![Screenshot-settings](http://davols.github.io/android-light-dasftp/images/settings.png)
 
 ##Authors and Contributors
-@olsdav, @bvb (icon), jcraft (sftp library)  http://www.jcraft.com/jsch/
+@davols, @bleckfisk (icon), jcraft (sftp library)  http://www.jcraft.com/jsch/
 
 ##License: 
 dasftp code is licensed under Apache v2 which can be seen at https://github.com/davols/android-light-dasftp/blob/master/LICENSE 
