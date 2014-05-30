@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- File created by the Android Action Bar Style Generator
+<?xml version="1.0" encoding="utf-8"?><!-- File created by the Android Action Bar Style Generator
 
      Copyright (C) 2011 The Android Open Source Project
      Copyright (C) 2012 readyState Software Ltd
@@ -29,8 +28,8 @@
         <item name="android:actionModeBackground">@drawable/cab_background_top_dasftp</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_dasftp</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Dasftp</item>
-        
-        
+
+
     </style>
 
     <style name="ActionBar.Solid.Dasftp" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
@@ -46,7 +45,7 @@
     </style>
 
     <style name="PopupMenu.Dasftp" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_dasftp</item>	
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_dasftp</item>
     </style>
 
     <style name="DropDownListView.Dasftp" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
@@ -62,11 +61,11 @@
         <item name="android:popupBackground">@drawable/menu_dropdown_panel_dasftp</item>
         <item name="android:dropDownSelector">@drawable/selectable_background_dasftp</item>
     </style>
-    
+
     <style name="ProgressBar.Dasftp" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_dasftp</item>
     </style>
-    
+
     <style name="ActionButton.CloseMode.Dasftp" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
         <item name="android:background">@drawable/btn_cab_done_dasftp</item>
     </style>

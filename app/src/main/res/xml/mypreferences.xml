@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
         android:key="pref_key_server_settings"
-        android:title="@string/pref_server" >
+        android:title="@string/pref_server">
         <EditTextPreference
             android:inputType="text"
             android:key="pref_host"
@@ -33,7 +33,7 @@
     </PreferenceCategory>
     <PreferenceCategory
         android:key="pref_key_server_settings_auth"
-        android:title="@string/pref_auth" >
+        android:title="@string/pref_auth">
         <EditTextPreference
             android:inputType="text"
             android:key="pref_user"
@@ -43,21 +43,19 @@
             android:key="pref_passwd"
             android:title="@string/pref_passwd" />
     </PreferenceCategory>
-    <PreferenceCategory
-        android:title="Miscellaneous"
-        >
-    <SwitchPreference
-        android:defaultValue="false"
-        android:key="pref_tag"
-        android:summary="@string/pref_tag_summ"
-        android:title="@string/pref_tag" />
+    <PreferenceCategory android:title="Miscellaneous">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_tag"
+            android:summary="@string/pref_tag_summ"
+            android:title="@string/pref_tag" />
 
-    <EditTextPreference
-        android:dependency="pref_tag"
-        android:inputType="textUri"
-        android:defaultValue="[img]%url[/img]"
-        android:key="pref_tag_txt"
-        android:summary="@string/pref_tag_txt_summ"
-        android:title="@string/pref_tag_txt" />
+        <EditTextPreference
+            android:defaultValue="[img]%url[/img]"
+            android:dependency="pref_tag"
+            android:inputType="textUri"
+            android:key="pref_tag_txt"
+            android:summary="@string/pref_tag_txt_summ"
+            android:title="@string/pref_tag_txt" />
     </PreferenceCategory>
 </PreferenceScreen>
