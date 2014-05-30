@@ -13,6 +13,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="22sp"
-        android:text="Please add a server in preferences" />
+        android:text="@string/add_server" />
 
 </RelativeLayout>

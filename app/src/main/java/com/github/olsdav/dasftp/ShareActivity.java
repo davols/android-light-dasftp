@@ -50,8 +50,8 @@ public class ShareActivity extends Activity{
             mNotifyManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             mBuilder = new Notification.Builder(this);
-            mBuilder.setContentTitle("Picture Download")
-                    .setContentText("Download in progress")
+            mBuilder.setContentTitle("Picture Upload")
+                    .setContentText("Upload in progress")
                     .setSmallIcon(R.drawable.ic_stat_av_upload);
             mBuilder.setProgress(0, 0, false);
             if (Intent.ACTION_SEND.equals(action) && type != null) {
@@ -119,9 +119,10 @@ public class ShareActivity extends Activity{
 			Log.d(TAG, "imageUri is null");
 		}
 	}
-	private class UploadTask extends AsyncTask<String, Integer, String> {
+	private class UploadTask extends AsyncTask<String, Integer, UploadResult> {
 		@Override
-		protected String doInBackground(String... paths) {
+		protected UploadResult doInBackground(String... paths) {
+            UploadResult mResult = new UploadResult();
 			String remoteUrl=null;
 			String filePath = paths[0];
 			Log.d(TAG,"test filepath: "+filePath);
@@ -172,13 +173,16 @@ public class ShareActivity extends Activity{
 				String fileName2 = createUniqueFileName(sftp,remotePath,fileName,extension);
 				sftp.put(filePath,remotePath+fileName2+extension);
 				remoteUrl=fileName2+extension;
+                mResult.setmUrl(remoteUrl);
                 Log.d(TAG,"pick remoteUrl :"+remoteUrl);
 			} catch (JSchException e) {
 				e.printStackTrace();
+                mResult.setFailedReason(e.getLocalizedMessage());
 				Log.d(TAG, "Exception 1" + e.getLocalizedMessage());
 				remoteUrl=null;
 			} catch (SftpException e) {
 				e.printStackTrace();
+                mResult.setFailedReason(e.getLocalizedMessage());
 				Log.d(TAG, "Exception 2" + e.getLocalizedMessage());
 				remoteUrl=null;
 			} finally {
@@ -189,30 +193,58 @@ public class ShareActivity extends Activity{
 					session.disconnect();
 				}
 			}
-			return remoteUrl;
+			return  mResult;
 
 		}
 
 		@Override
-		protected void onPostExecute(String result) {
+		protected void onPostExecute(UploadResult result) {
 			super.onPostExecute(result);
-            // When the loop is finished, updates the notification
-            mBuilder.setContentText("Upload complete")
-            // Removes the progress bar
-                    .setProgress(0,0,false);
-            mNotifyManager.notify(1, mBuilder.build());
+
             if(result!=null) {
-                if(prefs.getBoolean("pref_tag",false)) {
-                    String url = prefs.getString("pref_url",null)+result;
-                    String shareUrl = prefs.getString("pref_tag_txt","[img]%url[/img]").replace("%url",url);
-                    ClipData clip = ClipData.newPlainText("simple text",shareUrl);
-                    clipboard.setPrimaryClip(clip);
+                if(result.hasFailed())
+                {
+                    Toast.makeText(ShareActivity.this,R.string.upload_failed,Toast.LENGTH_LONG).show();
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putBoolean("recent_failed",true);
+                    edit.putString("failed_reason",result.getFailedReason());
+                    edit.commit();
+                    //Update notification
+                    mBuilder.setSmallIcon(R.drawable.ic_stat_alerts_and_states_error);
+                    mBuilder.setContentText("Upload failed")
+                            // Removes the progress bar
+                            .setProgress(0,0,false);
+                    mNotifyManager.notify(1, mBuilder.build());
                 }
-                else {
-                    ClipData clip = ClipData.newPlainText("simple text",prefs.getString("pref_url",null)+result);
-                    clipboard.setPrimaryClip(clip);
+                else
+                {
+                    Toast.makeText(ShareActivity.this,R.string.upload_complete,Toast.LENGTH_LONG).show();
+                    //Update notification
+                    mBuilder.setSmallIcon(R.drawable.ic_stat_av_upload);
+                    mBuilder.setContentText("Upload complete")
+                            // Removes the progress bar
+                            .setProgress(0,0,false);
+                    mNotifyManager.notify(1, mBuilder.build());
+                    //Recent didnt fail.
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putBoolean("recent_failed",false);
+                    edit.putString("failed_reason",null);
+                    edit.commit();
+                    if(prefs.getBoolean("pref_tag",false)) {
+                        String url = prefs.getString("pref_url",null)+result.getmUrl();
+                        String shareUrl = prefs.getString("pref_tag_txt","[img]%url[/img]").replace("%url",url);
+                        ClipData clip = ClipData.newPlainText("simple text",shareUrl);
+                        clipboard.setPrimaryClip(clip);
+                    }
+                    else {
+                        ClipData clip = ClipData.newPlainText("simple text",prefs.getString("pref_url",null)+result.getmUrl());
+                        clipboard.setPrimaryClip(clip);
+
+                    }
 
                 }
+
+
 
             }
 		}

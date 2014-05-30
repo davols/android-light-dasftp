@@ -30,11 +30,24 @@ public class MainActivity extends Activity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if(hasPreferences(prefs) && tw !=null)
         {
-            tw.setVisibility(View.INVISIBLE);
+
+            if(prefs.getBoolean("recent_failed",false))
+            {
+               tw.setText(String.format(getString(R.string.last_upload_failed),prefs.getString("failed_reason","Unknown")));
+                Typeface tf = Typeface.createFromAsset(this.getAssets(),"fonts/robotolight.ttf");
+                tw.setVisibility(View.VISIBLE);
+                tw.setTypeface(tf);
+                tw.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                tw.setVisibility(View.INVISIBLE);
+            }
         }
         else
         {
             Typeface tf = Typeface.createFromAsset(this.getAssets(),"fonts/robotolight.ttf");
+            tw.setText(R.string.add_server);
             tw.setVisibility(View.VISIBLE);
             tw.setTypeface(tf);
         }

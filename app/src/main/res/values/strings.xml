@@ -3,6 +3,11 @@
 
     <string name="app_name">daSftp</string>
     <string name="hello_world">Hello world!</string>
+    <string name="upload_failed">Upload failed</string>
+    <string name="upload_complete">Upload complete, added to clipboard</string>
+
+    <string name="add_server">Please add a server in preferences</string>
+    <string name="last_upload_failed">Last update failed. Reason: %s</string>
     <string name="settings">Settings</string>
     <string name="pref_server">Remote connection</string>
     <string name="pref_valid_cert">Signed Certs</string>
