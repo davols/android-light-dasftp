@@ -21,4 +21,11 @@
     <string name="pref_user">Username</string>
     <string name="pref_passwd">Password</string>
 
+    <!--Misc -->
+    <string name="pref_tag_summ">Add tags to clipboard</string>
+    <string name="pref_tag">Add tag</string>
+
+    <string name="pref_tag_txt_summ">Has to include %url</string>
+    <string name="pref_tag_txt">Write tags</string>
+
 </resources>

@@ -202,8 +202,18 @@ public class ShareActivity extends Activity{
                     .setProgress(0,0,false);
             mNotifyManager.notify(1, mBuilder.build());
             if(result!=null) {
-            	ClipData clip = ClipData.newPlainText("simple text",prefs.getString("pref_url",null)+result);
-            	clipboard.setPrimaryClip(clip);
+                if(prefs.getBoolean("pref_tag",false)) {
+                    String url = prefs.getString("pref_url",null)+result;
+                    String shareUrl = prefs.getString("pref_tag_txt","[img]%url[/img]").replace("%url",url);
+                    ClipData clip = ClipData.newPlainText("simple text",shareUrl);
+                    clipboard.setPrimaryClip(clip);
+                }
+                else {
+                    ClipData clip = ClipData.newPlainText("simple text",prefs.getString("pref_url",null)+result);
+                    clipboard.setPrimaryClip(clip);
+
+                }
+
             }
 		}
 
