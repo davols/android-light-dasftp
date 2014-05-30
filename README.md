@@ -7,8 +7,8 @@ Page: http://davols.github.io/android-light-dasftp
 ##TODOs
 - Home should link to shared pictures with thumbnail
 - Being able to have several sites saved
-- Error handling while uploading
-
+- More advanced error handling?
+- Prettier homescreen if failed?
 
 Question is how to make it as simple as possible but also user-friendly and how many functions that should be implemented
 
@@ -16,7 +16,8 @@ Question is how to make it as simple as possible but also user-friendly and how 
 
 ![Screenshot-home](http://davols.github.io/android-light-dasftp/images/home.png)
 ![Screenshot-settings](http://davols.github.io/android-light-dasftp/images/settings.png)
-
+![Screenshot-home-failed](http://davols.github.io/android-light-dasftp/images/home_failed.png)
+![Screenshot-settings2](http://davols.github.io/android-light-dasftp/images/settings2.png)
 ##Authors and Contributors
 @davols , @bleckfisk (icon), jcraft (sftp library)  http://www.jcraft.com/jsch/
 
