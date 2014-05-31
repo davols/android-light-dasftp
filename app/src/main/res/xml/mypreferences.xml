@@ -57,5 +57,18 @@
             android:key="pref_tag_txt"
             android:summary="@string/pref_tag_txt_summ"
             android:title="@string/pref_tag_txt" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/clickAlias"
+            android:entryValues="@array/clickValues"
+            android:key="pref_list"
+            android:summary="@string/pref_default_list_summ"
+            android:title="@string/pref_default_list" />
+
+        <Preference
+            android:key="clear_hist"
+            android:summary="@string/clear_hist_summ"
+            android:title="@string/clear_hist"></Preference>
     </PreferenceCategory>
 </PreferenceScreen>

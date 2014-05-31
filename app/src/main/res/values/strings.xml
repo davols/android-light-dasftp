@@ -5,6 +5,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="upload_failed">Upload failed</string>
     <string name="upload_complete">Upload complete, added to clipboard</string>
+    <string name="no_uploads">No recent uploads</string>
+    <string name="added_clipboard">Added to clipboard</string>
+    <string name="added_tag_clipboard">Added to clipboard with tags</string>
 
     <string name="add_server">Please add a server in preferences</string>
     <string name="last_upload_failed">Last update failed. Reason: %s</string>
@@ -32,5 +35,23 @@
 
     <string name="pref_tag_txt_summ">Has to include %url</string>
     <string name="pref_tag_txt">Write tags</string>
+    <string name="pref_default_list">Default list action</string>
+    <string name="pref_default_list_summ">Default click action in home list</string>
+    <string name="clear_hist">Clear history</string>
+    <string name="clear_hist_summ">Clear home history list and thumbnail cache</string>
 
+    <!--Menu Stuff -->
+    <string name="open_browser">Open in browser</string>
+    <string name="copy">Copy</string>
+    <string name="copy_tags">Copy with tags</string>
+    <string-array name="clickAlias">
+        <item>@string/open_browser</item>
+        <item>@string/copy</item>
+        <item>@string/copy_tags</item>
+    </string-array>
+    <string-array name="clickValues">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 </resources>

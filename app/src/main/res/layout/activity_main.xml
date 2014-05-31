@@ -11,7 +11,23 @@
         android:layout_centerHorizontal="true"
         android:layout_centerInParent="true"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:gravity="center"
         android:text="@string/add_server"
-        android:textSize="22sp" />
+        android:textColor="#A6A6A6"
+        android:textSize="20sp" />
 
+    <ImageView
+        android:id="@+id/warning"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_above="@id/tw"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_warning" />
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>
