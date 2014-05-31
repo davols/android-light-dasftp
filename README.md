@@ -8,6 +8,8 @@ Page: http://davols.github.io/android-light-dasftp
 - Being able to have several sites saved
 - More advanced error handling?
 
+For more todos see https://github.com/davols/android-light-dasftp/issues?state=open
+
 Question is how to make it as simple as possible but also user-friendly and how many functions that should be implemented
 First thought is imgur guest and then more sftp sites.
 
