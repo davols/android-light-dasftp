@@ -23,6 +23,7 @@
     <string name="pref_path_summ">Path on remote machine where picture is saved</string>
     <string name="pref_url">Website url</string>
     <string name="pref_url_summ">Url of the server</string>
+    <string name="default_port">22</string>
 
     <!-- User auth -->
     <string name="pref_auth">Authentication</string>
