@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -31,7 +32,15 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Calendar;
 
 
@@ -184,7 +193,7 @@ public class ShareActivity extends Activity {
     }
 
     void handleSendImage(Intent intent) {
-        String[] filePathColumn = {MediaStore.MediaColumns.DATA};
+        String[] filePathColumn = {MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.MIME_TYPE, MediaStore.MediaColumns.TITLE};
         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
         if (imageUri != null) {
             // Update UI to reflect image being shared
@@ -200,9 +209,22 @@ public class ShareActivity extends Activity {
                     int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
 
                     filePath = cursor.getString(columnIndex);
-
+                    String perhapsFileName = cursor.getString(cursor.getColumnIndex(filePathColumn[1]));
+                    String mimeType = cursor.getString(cursor.getColumnIndex(filePathColumn[2]));
+                    String mTitle = cursor.getString(cursor.getColumnIndex(filePathColumn[3]));
+                    Log.d("Main", "PerhapsFileName:" + perhapsFileName);
+                    Log.d("Main", "perhaps mimeType:" + mimeType);
+                    Log.d("Main", "the title??:" + mTitle);
                     cursor.close();
-                    new UploadTask().execute(filePath);
+                    if (filePath == null) {
+                        Log.d("Main", "null filepath wtf");
+                        //If filepath is null assume that it's from online source. So we need to download it first.
+                        new DownloadPictureTask(this).execute(imageUri.toString(), perhapsFileName);
+                    } else {
+                        Log.d("Main", "not null");
+                        new UploadTask().execute(filePath);
+                    }
+
                 }
 
             }
@@ -233,6 +255,206 @@ public class ShareActivity extends Activity {
         return builder.toString();
     }
 
+    private class DownloadPictureTask extends AsyncTask<String, Integer, UploadResult> {
+        private Context mContext;
+
+        public DownloadPictureTask(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        protected UploadResult doInBackground(String... input) {
+            //TODO another download file path, that needs to be created (perhaps with LRUCache?)
+            //TODO Google+ just says image.jpg/png. Crashes, but some stuff works.
+
+            Log.d("Main", "cool background");
+            ParcelFileDescriptor parcelFileDescriptor = null;
+            try {
+                parcelFileDescriptor = mContext.getContentResolver()
+                        .openFileDescriptor(Uri.parse(input[0]), "r");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Log.d("Main", "cfailed 3" + e.getLocalizedMessage());
+            }
+
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+
+            InputStream inputStream = new FileInputStream(fileDescriptor);
+
+            BufferedInputStream reader = new BufferedInputStream(inputStream);
+            boolean failed = false;
+            // Create an output stream to a file that you want to save to
+            BufferedOutputStream outStream = null;
+            try {
+                outStream = new BufferedOutputStream(
+                        new FileOutputStream(getDiskCacheDir(mContext, "dl") + "/" + input[1]));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                failed = true;
+                Log.d("Main", "cfailed 2" + e.getLocalizedMessage());
+            }
+            byte[] buf = new byte[2048];
+            int len;
+            try {
+                while ((len = reader.read(buf)) > 0) outStream.write(buf, 0, len);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d("Main", "cfailed 1" + e.getLocalizedMessage());
+                failed = true;
+            }
+            if (!failed) {
+                Log.d("Main", "Cool yo");
+                UploadResult mResult = new UploadResult();
+                String filePath = getDiskCacheDir(mContext, "dl") + "/" + input[1];
+                Log.d("Main", "not fialed and filePath:" + filePath);
+                mResult.setFilePath(filePath);
+                Log.d("Main", "WTF:" + input[1]);
+
+
+                String fileName = input[1].substring(0, input[1].indexOf("."));
+                Log.d("Main", "name::" + fileName);
+                mResult.setName(fileName);
+                String extension = input[1].substring(input[1].indexOf("."), input[1].length());
+                Log.d("Main", "Ext:" + extension);
+                Session session = null;
+                Channel channel = null;
+                try {
+                    JSch ssh = new JSch();
+                    java.util.Properties config = new java.util.Properties();
+                    if (prefs.getBoolean("pref_cert", true)) {
+
+                        config.put("StrictHostKeyChecking", "yes");
+                        JSch.setConfig("StrictHostKeyChecking", "yes");
+                    } else {
+
+                        config.put("StrictHostKeyChecking", "no");
+                        JSch.setConfig("StrictHostKeyChecking", "no");
+                    }
+
+                    session = ssh.getSession(prefs.getString("pref_user", null), prefs.getString("pref_host", null), Integer.parseInt(prefs.getString("pref_port", "0")));
+                    session.setPassword(prefs.getString("pref_passwd", null));
+                    session.setConfig(config);
+                    session.connect();
+
+
+                    channel = session.openChannel("sftp");
+                    channel.connect();
+                    ChannelSftp sftp = (ChannelSftp) channel;
+
+                    String remotePath;
+                    if (!prefs.getString("pref_path", null).endsWith("/")) {
+                        remotePath = prefs.getString("pref_path", null) + "/";
+                    } else {
+                        remotePath = prefs.getString("pref_path", null);
+                    }
+                    String fileName2 = createUniqueFileName(sftp, remotePath, fileName, extension);
+                    sftp.put(filePath, remotePath + fileName2 + extension);
+                    mResult.setUploadName(fileName2);
+                    mResult.setmUrl(fileName2 + extension);
+
+                } catch (JSchException e) {
+                    e.printStackTrace();
+                    mResult.setFailedReason(e.getLocalizedMessage());
+
+                } catch (SftpException e) {
+                    e.printStackTrace();
+                    mResult.setFailedReason(e.getLocalizedMessage());
+
+                } finally {
+                    if (channel != null) {
+                        channel.disconnect();
+                    }
+                    if (session != null) {
+                        session.disconnect();
+                    }
+                }
+                //Only add to cache if it didnt fail.
+                if (!mResult.hasFailed()) {
+                    if (mDiskLruCache == null) {
+                        Log.d("Main", "LRU IS NULL");
+                    }
+                    if (filePath == null) {
+                        Log.d("Main", "AWDG PATH NULL");
+                    }
+                    if (decodeSampledBitmapFromResource(filePath, 200, 200) == null) {
+                        Log.d("Main", "fucking pic is null");
+                    }
+                    mDiskLruCache.put(fileName + extension, decodeSampledBitmapFromResource(filePath, 200, 200));
+                }
+
+
+                return mResult;
+
+            }
+
+            return null;
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mNotifyManager.notify(1, mBuilder.build());
+        }
+
+        @Override
+        protected void onPostExecute(UploadResult result) {
+            super.onPostExecute(result);
+
+            if (result != null) {
+                if (result.hasFailed()) {
+                    Toast.makeText(ShareActivity.this, R.string.upload_failed, Toast.LENGTH_LONG).show();
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putBoolean("recent_failed", true);
+                    edit.putString("failed_reason", result.getFailedReason());
+                    edit.commit();
+                    //Update notification
+                    mBuilder.setSmallIcon(R.drawable.ic_stat_alerts_and_states_error);
+                    mBuilder.setContentText("Upload failed")
+                            // Removes the progress bar
+                            .setProgress(0, 0, false);
+                    mNotifyManager.notify(1, mBuilder.build());
+                } else {
+                    ContentResolver cr = getContentResolver();
+                    ContentValues cv = new ContentValues();
+                    cv.put(PictureUploadProvider.KEY_DATE_UPLOADED, Calendar.getInstance().getTimeInMillis());
+                    cv.put(PictureUploadProvider.KEY_NAME, result.getName());
+                    cv.put(PictureUploadProvider.KEY_URL, prefs.getString("pref_url", null) + result.getmUrl());
+                    cv.put(PictureUploadProvider.KEY_UPL_NAME, result.getUploadName());
+                    cv.put(PictureUploadProvider.KEY_FILEPATH, result.getFilePath());
+                    cr.insert(PictureUploadProvider.CONTENT_URI, cv);
+
+                    Toast.makeText(ShareActivity.this, R.string.upload_complete, Toast.LENGTH_LONG).show();
+                    //Update notification
+                    mBuilder.setSmallIcon(R.drawable.ic_stat_av_upload);
+                    mBuilder.setContentText("Upload complete")
+                            // Removes the progress bar
+                            .setProgress(0, 0, false);
+                    mNotifyManager.notify(1, mBuilder.build());
+                    //Recent didnt fail.
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putBoolean("recent_failed", false);
+                    edit.putString("failed_reason", null);
+                    edit.commit();
+                    if (prefs.getBoolean("pref_tag", false)) {
+                        String url = prefs.getString("pref_url", null) + result.getmUrl();
+                        String shareUrl = prefs.getString("pref_tag_txt", "[img]%url[/img]").replace("%url", url);
+                        ClipData clip = ClipData.newPlainText("simple text", shareUrl);
+                        clipboard.setPrimaryClip(clip);
+                    } else {
+                        ClipData clip = ClipData.newPlainText("simple text", prefs.getString("pref_url", null) + result.getmUrl());
+                        clipboard.setPrimaryClip(clip);
+
+                    }
+
+                }
+
+            }
+
+
+        }
+
+    }
     private class UploadTask extends AsyncTask<String, Integer, UploadResult> {
 
         public UploadTask() {
@@ -375,4 +597,6 @@ public class ShareActivity extends Activity {
 
 
     }
+
+
 }
