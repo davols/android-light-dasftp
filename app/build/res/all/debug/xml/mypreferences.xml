@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="pref_key_server_settings"
+        android:title="@string/pref_server">
+        <EditTextPreference
+            android:inputType="text"
+            android:key="pref_host"
+            android:summary="@string/pref_host_summ"
+            android:title="@string/pref_host" />
+        <EditTextPreference
+            android:defaultValue="@string/default_port"
+            android:inputType="number"
+            android:key="pref_port"
+            android:summary="@string/pref_port_summ"
+            android:title="@string/pref_port" />
+        <EditTextPreference
+            android:inputType="text"
+            android:key="pref_path"
+            android:summary="@string/pref_path_summ"
+            android:title="@string/pref_path" />
+        <EditTextPreference
+            android:inputType="textUri"
+            android:key="pref_url"
+            android:summary="@string/pref_url_summ"
+            android:title="@string/pref_url" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_cert"
+            android:summary="@string/pref_cert_summ"
+            android:title="@string/pref_valid_cert" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="pref_key_server_settings_auth"
+        android:title="@string/pref_auth">
+        <EditTextPreference
+            android:inputType="text"
+            android:key="pref_user"
+            android:title="@string/pref_user" />
+        <EditTextPreference
+            android:inputType="textPassword"
+            android:key="pref_passwd"
+            android:title="@string/pref_passwd" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Miscellaneous">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_tag"
+            android:summary="@string/pref_tag_summ"
+            android:title="@string/pref_tag" />
+
+        <EditTextPreference
+            android:defaultValue="[img]%url[/img]"
+            android:dependency="pref_tag"
+            android:inputType="textUri"
+            android:key="pref_tag_txt"
+            android:summary="@string/pref_tag_txt_summ"
+            android:title="@string/pref_tag_txt" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/clickAlias"
+            android:entryValues="@array/clickValues"
+            android:key="pref_list"
+            android:summary="@string/pref_default_list_summ"
+            android:title="@string/pref_default_list" />
+
+        <Preference
+            android:key="clear_hist"
+            android:summary="@string/clear_hist_summ"
+            android:title="@string/clear_hist"></Preference>
+    </PreferenceCategory>
+</PreferenceScreen><!-- From: file:/home/morn/Development/android-light-dasftp/app/src/main/res/xml/mypreferences.xml -->

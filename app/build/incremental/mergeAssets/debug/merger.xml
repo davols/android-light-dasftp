@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/home/morn/Development/android-light-dasftp/app/src/main/assets" >
+            <file
+                name="fonts/robotolight.ttf"
+                path="/home/morn/Development/android-light-dasftp/app/src/main/assets/fonts/robotolight.ttf" />
+            <file
+                name="fonts/robotomedium.ttf"
+                path="/home/morn/Development/android-light-dasftp/app/src/main/assets/fonts/robotomedium.ttf" />
+            <file
+                name="fonts/robotoregular.ttf"
+                path="/home/morn/Development/android-light-dasftp/app/src/main/assets/fonts/robotoregular.ttf" />
+        </source>
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/home/morn/Development/android-light-dasftp/app/src/debug/assets" />
+    </dataSet>
+
+</merger>
