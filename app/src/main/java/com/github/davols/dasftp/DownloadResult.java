@@ -1,22 +1,21 @@
 package com.github.davols.dasftp;
 
 /**
- * Created by davols on 30.05.14.
+ * Created by morn on 07.06.14.
  */
-public class UploadResult extends TaskResult {
+public class DownloadResult extends TaskResult {
 
-    private String mUrl;
     private String mName;
     private String uploadName;
     private String filePath;
 
-    public UploadResult(String failedReason, String mUrl) {
-        this.setmUrl(mUrl);
+    public DownloadResult(String failedReason) {
+
         this.setFailedReason(failedReason);
     }
 
-    public UploadResult() {
-        mUrl = null;
+    public DownloadResult() {
+
     }
 
     public String getFilePath() {
@@ -44,11 +43,4 @@ public class UploadResult extends TaskResult {
     }
 
 
-    public String getmUrl() {
-        return mUrl;
-    }
-
-    public void setmUrl(String mUrl) {
-        this.mUrl = mUrl;
-    }
 }

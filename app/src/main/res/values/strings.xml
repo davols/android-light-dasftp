@@ -8,6 +8,7 @@
     <string name="no_uploads">No recent uploads</string>
     <string name="added_clipboard">Added to clipboard</string>
     <string name="added_tag_clipboard">Added to clipboard with tags</string>
+    <string name="download_failed">Download failed</string>
 
     <string name="add_server">Please add a server in preferences</string>
     <string name="last_upload_failed">Last update failed. Reason: %s</string>

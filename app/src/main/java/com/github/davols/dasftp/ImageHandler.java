@@ -2,11 +2,17 @@ package com.github.davols.dasftp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
+import android.text.TextUtils;
+import android.util.Config;
 import android.util.Log;
 
 import com.jcraft.jsch.Channel;
@@ -16,9 +22,17 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +44,7 @@ import java.io.InputStream;
  */
 public class ImageHandler {
     public final static String DOWNLOAD_CACHE = "dl";
+    private static final String TAG = "ImageHandler";
     // class variable
     final String lexicon = "ABCDEFGHIJKLMNOPQRSTUVWXYZ12345674890";
     final java.util.Random rand = new java.util.Random();
@@ -134,10 +149,10 @@ public class ImageHandler {
         UploadResult mResult = new UploadResult();
 
         String filePath = path;
-        Log.d("Main", "uploadImage filePath:" + filePath);
+        Log.d(TAG, "uploadImage filePath:" + filePath);
         mResult.setFilePath(filePath);
         String fileName = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.lastIndexOf("."));
-        Log.d("Main", "uploadImage fileName: " + fileName);
+        Log.d(TAG, "uploadImage fileName: " + fileName);
         mResult.setName(fileName);
         String extension = filePath.substring(filePath.lastIndexOf("."));
 
@@ -197,13 +212,13 @@ public class ImageHandler {
         if (!mResult.hasFailed()) {
 
             if (mDiskLruCache == null) {
-                Log.d("Main", "LRU IS NULL");
+                Log.d(TAG, "LRU IS NULL");
             }
             if (filePath == null) {
-                Log.d("Main", "AWDG PATH NULL");
+                Log.d(TAG, "AWDG PATH NULL");
             }
             if (decodeSampledBitmapFromResource(filePath, 200, 200) == null) {
-                Log.d("Main", "fucking pic is null but FilePath:" + filePath);
+                Log.d(TAG, "fucking pic is null but FilePath:" + filePath);
             }
             mDiskLruCache.put(fileName + extension, decodeSampledBitmapFromResource(filePath, 200, 200));
 
@@ -212,35 +227,36 @@ public class ImageHandler {
         return mResult;
     }
 
-    public boolean downloadPicture(Uri imageUri, String fileName) {
+    public DownloadResult downloadPicture(Uri imageUri, String fileName) {
         //TODO another download file path, that needs to be created (perhaps with LRUCache?)
         //TODO Google+ just says image.jpg/png. Crashes, but some stuff works.
 
-        // Log.d("Main", "downloadPicture:filePath:"+filePath);
-
+        Log.d(TAG, "downloadPicture:filePath:" + imageUri.getPath());
+        DownloadResult mResult;
+        /**
         InputStream inputStream = null;
         try {
             inputStream = mContext.getContentResolver().openInputStream(imageUri);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            Log.d("Main", "file not found");
+         Log.d(TAG, "file not found");
         }
 
         BufferedInputStream reader = new BufferedInputStream(inputStream);
         File dlCache = getDiskCacheDir(mContext, DOWNLOAD_CACHE);
         if (!dlCache.exists()) {
             dlCache.mkdir();
-            Log.d("Main", "creating download cache");
+         Log.d(TAG, "creating download cache");
         } else {
-            Log.d("Main", "directory exists");
+         Log.d(TAG, "directory exists");
         }
         String saveFilePath = getDiskCacheDir(mContext, DOWNLOAD_CACHE) + "/" + fileName;
         File savedFile = new File(saveFilePath);
         if (savedFile.exists()) {
-            Log.d("Main", "pic exists");
+         Log.d(TAG, "pic exists");
             savedFile.delete();
         }
-        Log.d("Main", "Saving to:" + saveFilePath);
+         Log.d(TAG, "Saving to:" + saveFilePath);
         // Create an output stream to a file that you want to save to
         BufferedOutputStream outStream = null;
         try {
@@ -249,7 +265,7 @@ public class ImageHandler {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
 
-            Log.d("Main", "cfailed 2" + e.getLocalizedMessage());
+         Log.d(TAG, "cfailed 2" + e.getLocalizedMessage());
             return true;
         }
 
@@ -263,14 +279,105 @@ public class ImageHandler {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d("Main", "cfailed 1" + e.getLocalizedMessage());
+         Log.d(TAG, "cfailed 1" + e.getLocalizedMessage());
             return true;
         }
+         */
+        mResult = new DownloadResult();
+        String filePath = imageUri.toString();
+        Log.d(TAG, "YES filePath scheme:" + filePath);
+        if (filePath != null && filePath.startsWith("content:")) {
+            filePath = getAbsoluteImagePathFromUri(Uri.parse(filePath));
+        }
+        if (filePath == null || TextUtils.isEmpty(filePath)) {
+            Log.d(TAG, "Cant process a null file");
+        } else if (filePath.startsWith("http")) {
+            Log.d(TAG, "downloadFile");
+            return downloadFile(mResult, filePath, fileName);
+        } else if (filePath
+                .startsWith("content://com.google.android.gallery3d")
+                || filePath
+                .startsWith("content://com.microsoft.skydrive.content.external")) {
+            Log.d(TAG, "processPicasaMedia");
+            try {
+                processPicasaMedia(mResult, filePath, fileName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "Failed:" + e.getLocalizedMessage());
+                mResult.setFailedReason(e.getLocalizedMessage());
+                return mResult;
+            }
+        } else if (filePath
+                .startsWith("content://com.google.android.apps.photos.content")
+                || filePath
+                .startsWith("content://com.android.providers.media.documents")
+                || filePath
+                .startsWith("content://com.google.android.apps.docs.storage")) {
+            Log.d(TAG, "processGooglePhotosMedia");
+            try {
+                processGooglePhotosMedia(mResult, filePath, fileName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "Failed:" + e.getLocalizedMessage());
+                mResult.setFailedReason(e.getLocalizedMessage());
+                return mResult;
+            }
+        } else {
+            Log.d(TAG, "nothing");
 
+        }
 
-        return false;
+        return mResult;
     }
 
+    protected DownloadResult downloadFile(DownloadResult mResult, String url, String fileName) {
+
+        HttpClient client = new DefaultHttpClient();
+        HttpGet getRequest = new HttpGet(url);
+
+        try {
+            HttpResponse response = client.execute(getRequest);
+            InputStream stream = response.getEntity().getContent();
+
+            File dlCache = getDiskCacheDir(mContext, DOWNLOAD_CACHE);
+            if (!dlCache.exists()) {
+                dlCache.mkdir();
+                Log.d(TAG, "creating download cache");
+            } else {
+                Log.d(TAG, "directory exists");
+            }
+            String saveFilePath = getDiskCacheDir(mContext, DOWNLOAD_CACHE) + "/" + fileName;
+
+
+            FileOutputStream fileOutputStream = new FileOutputStream(saveFilePath);
+
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = stream.read(buffer)) > 0)
+                fileOutputStream.write(buffer, 0, len);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+            stream.close();
+            mResult.setFilePath(saveFilePath);
+            mResult.setName(fileName);
+            Log.i(TAG, "Image saved: " + saveFilePath.toString());
+
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+            mResult.setFailedReason(e.getLocalizedMessage());
+            return mResult;
+        } catch (IOException e) {
+            e.printStackTrace();
+            mResult.setFailedReason(e.getLocalizedMessage());
+            return mResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            mResult.setFailedReason(e.getLocalizedMessage());
+            return mResult;
+        }
+
+        return mResult;
+    }
     private String createUniqueFileName(ChannelSftp sftp, String remotePath, String name, String extension) {
         String mName = name;
         int length = 1;
@@ -294,5 +401,275 @@ public class ImageHandler {
             builder.append(lexicon.charAt(rand.nextInt(lexicon.length())));
         return builder.toString();
     }
+
+    private DownloadResult processPicasaMedia(DownloadResult mResult, String path, String fileName) {
+        Log.d(TAG, "Download Started");
+
+
+        try {
+            InputStream inputStream = mContext.getContentResolver()
+                    .openInputStream(Uri.parse(path));
+            File dlCache = getDiskCacheDir(mContext, DOWNLOAD_CACHE);
+            if (!dlCache.exists()) {
+                dlCache.mkdir();
+                Log.d(TAG, "creating download cache");
+            } else {
+                Log.d(TAG, "directory exists");
+            }
+            String saveFilePath = getDiskCacheDir(mContext, DOWNLOAD_CACHE) + "/" + fileName;
+            BufferedOutputStream outStream = new BufferedOutputStream(
+                    new FileOutputStream(saveFilePath));
+            byte[] buf = new byte[2048];
+            int len;
+            while ((len = inputStream.read(buf)) > 0) {
+                outStream.write(buf, 0, len);
+            }
+
+            inputStream.close();
+            outStream.close();
+            mResult.setFilePath(saveFilePath);
+            mResult.setName(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            mResult.setFailedReason(e.getLocalizedMessage());
+            return mResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            mResult.setFailedReason(e.getLocalizedMessage());
+            return mResult;
+        }
+
+        return mResult;
+    }
+
+    private DownloadResult processGooglePhotosMedia(DownloadResult mResult, String path, String fileName) {
+
+        Log.i(TAG, "Google photos Started");
+        Log.i(TAG, "URI: " + path);
+
+        try {
+
+            File dlCache = getDiskCacheDir(mContext, DOWNLOAD_CACHE);
+            if (!dlCache.exists()) {
+                dlCache.mkdir();
+                Log.d(TAG, "creating download cache");
+            } else {
+                Log.d(TAG, "directory exists");
+            }
+            String saveFilePath = getDiskCacheDir(mContext, DOWNLOAD_CACHE) + "/" + fileName;
+
+            ParcelFileDescriptor parcelFileDescriptor = mContext
+                    .getContentResolver().openFileDescriptor(Uri.parse(path),
+                            "r");
+
+            FileDescriptor fileDescriptor = parcelFileDescriptor
+                    .getFileDescriptor();
+
+            InputStream inputStream = new FileInputStream(fileDescriptor);
+
+            BufferedInputStream reader = new BufferedInputStream(inputStream);
+
+            BufferedOutputStream outStream = new BufferedOutputStream(
+                    new FileOutputStream(saveFilePath));
+            byte[] buf = new byte[2048];
+            int len;
+            while ((len = reader.read(buf)) > 0) {
+                outStream.write(buf, 0, len);
+            }
+            outStream.flush();
+            outStream.close();
+            inputStream.close();
+            mResult.setFilePath(saveFilePath);
+            mResult.setName(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            mResult.setFailedReason(e.getLocalizedMessage());
+            return mResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            mResult.setFailedReason(e.getLocalizedMessage());
+            return mResult;
+        }
+
+        return mResult;
+
+    }
+
+    private String getAbsoluteImagePathFromUri(Uri imageUri) {
+        String[] proj = {MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.DISPLAY_NAME};
+
+        if (Config.DEBUG) {
+            Log.i(TAG, "Image Uri: " + imageUri.toString());
+        }
+
+        if (imageUri.toString().startsWith(
+                "content://com.android.gallery3d.provider")) {
+            imageUri = Uri.parse(imageUri.toString().replace(
+                    "com.android.gallery3d", "com.google.android.gallery3d"));
+        }
+
+        String filePath = "";
+        String imageUriString = imageUri.toString();
+        if (imageUriString.startsWith("content://com.google.android.gallery3d")
+                || imageUriString
+                .startsWith("content://com.google.android.apps.photos.content")
+                || imageUriString
+                .startsWith("content://com.android.providers.media.documents")
+                || imageUriString
+                .startsWith("content://com.google.android.apps.docs.storage")
+                || imageUriString
+                .startsWith("content://com.microsoft.skydrive.content.external")) {
+            filePath = imageUri.toString();
+        } else {
+            Cursor cursor = mContext.getContentResolver().query(imageUri, proj,
+                    null, null, null);
+            cursor.moveToFirst();
+            filePath = cursor.getString(cursor
+                    .getColumnIndexOrThrow(MediaStore.MediaColumns.DATA));
+            cursor.close();
+        }
+
+        return filePath;
+    }
+
+    /**
+     * protected void processPicasaMedia(String path, String extension)
+     * throws Exception {
+     * <p/>
+     * <p/>
+     * try {
+     * InputStream inputStream = mContext.getContentResolver()
+     * .openInputStream(Uri.parse(path));
+     * <p/>
+     * filePath = FileUtils.getDirectory(foldername) + File.separator
+     * + Calendar.getInstance().getTimeInMillis() + extension;
+     * <p/>
+     * BufferedOutputStream outStream = new BufferedOutputStream(
+     * new FileOutputStream(filePath));
+     * byte[] buf = new byte[2048];
+     * int len;
+     * while ((len = inputStream.read(buf)) > 0) {
+     * outStream.write(buf, 0, len);
+     * }
+     * inputStream.close();
+     * outStream.close();
+     * <p/>
+     * } catch (FileNotFoundException e) {
+     * e.printStackTrace();
+     * throw e;
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * throw e;
+     * }
+     * if (Config.DEBUG) {
+     * Log.i(TAG, "Picasa Done");
+     * }
+     * }
+     * <p/>
+     * protected void processGooglePhotosMedia(String path, String extension)
+     * throws Exception {
+     * <p/>
+     * Log.i(TAG, "Google photos Started");
+     * Log.i(TAG, "URI: " + path);
+     * Log.i(TAG, "Extension: " + extension);
+     * <p/>
+     * String retrievedExtension = checkExtension(Uri.parse(path));
+     * if (retrievedExtension != null
+     * && !TextUtils.isEmpty(retrievedExtension)) {
+     * extension = "." + retrievedExtension;
+     * }
+     * try {
+     * <p/>
+     * filePath = FileUtils.getDirectory(foldername) + File.separator
+     * + Calendar.getInstance().getTimeInMillis() + extension;
+     * <p/>
+     * ParcelFileDescriptor parcelFileDescriptor = context
+     * .getContentResolver().openFileDescriptor(Uri.parse(path),
+     * "r");
+     * <p/>
+     * FileDescriptor fileDescriptor = parcelFileDescriptor
+     * .getFileDescriptor();
+     * <p/>
+     * InputStream inputStream = new FileInputStream(fileDescriptor);
+     * <p/>
+     * BufferedInputStream reader = new BufferedInputStream(inputStream);
+     * <p/>
+     * BufferedOutputStream outStream = new BufferedOutputStream(
+     * new FileOutputStream(filePath));
+     * byte[] buf = new byte[2048];
+     * int len;
+     * while ((len = reader.read(buf)) > 0) {
+     * outStream.write(buf, 0, len);
+     * }
+     * outStream.flush();
+     * outStream.close();
+     * inputStream.close();
+     * process();
+     * } catch (FileNotFoundException e) {
+     * e.printStackTrace();
+     * throw e;
+     * } catch (Exception e) {
+     * e.printStackTrace();
+     * throw e;
+     * }
+     * <p/>
+     * Log.i(TAG, "Picasa Done");
+     * <p/>
+     * }
+     */
+    public String checkExtension(Uri uri) {
+
+        String extension = "";
+
+        // The query, since it only applies to a single document, will only
+        // return
+        // one row. There's no need to filter, sort, or select fields, since we
+        // want
+        // all fields for one document.
+        Cursor cursor = mContext.getContentResolver().query(uri, null, null,
+                null, null);
+
+        try {
+            // moveToFirst() returns false if the cursor has 0 rows. Very handy
+            // for
+            // "if there's anything to look at, look at it" conditionals.
+            if (cursor != null && cursor.moveToFirst()) {
+
+                // Note it's called "Display Name". This is
+                // provider-specific, and might not necessarily be the file
+                // name.
+                String displayName = cursor.getString(cursor
+                        .getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                int position = displayName.indexOf(".");
+                extension = displayName.substring(position + 1);
+                Log.i(TAG, "Display Name: " + displayName);
+
+                int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                // If the size is unknown, the value stored is null. But since
+                // an
+                // int can't be null in Java, the behavior is
+                // implementation-specific,
+                // which is just a fancy term for "unpredictable". So as
+                // a rule, check if it's null before assigning to an int. This
+                // will
+                // happen often: The storage API allows for remote files, whose
+                // size might not be locally known.
+                String size = null;
+                if (!cursor.isNull(sizeIndex)) {
+                    // Technically the column stores an int, but
+                    // cursor.getString()
+                    // will do the conversion automatically.
+                    size = cursor.getString(sizeIndex);
+                } else {
+                    size = "Unknown";
+                }
+                Log.i(TAG, "Size: " + size);
+            }
+        } finally {
+            cursor.close();
+        }
+        return extension;
+    }
+
 
 }

@@ -97,15 +97,15 @@ public class ShareActivity extends Activity {
             Log.d("Main", "ImageUri:" + imageUri.toString());
             if (scheme.equals("content")) {
                 Cursor cursor = getContentResolver().query(imageUri, filePathColumn, null, null, null);
-                if (cursor != null) {
-                    cursor.moveToFirst(); // <--no more NPE
+                if (cursor != null) if (cursor.moveToFirst()) {
+
 
                     int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
 
                     filePath = cursor.getString(columnIndex);
-                    String perhapsFileName = cursor.getString(cursor.getColumnIndex(filePathColumn[1]));
-                    String mimeType = cursor.getString(cursor.getColumnIndex(filePathColumn[2]));
-                    String mTitle = cursor.getString(cursor.getColumnIndex(filePathColumn[3]));
+                    String perhapsFileName = cursor.getString(cursor.getColumnIndexOrThrow(filePathColumn[1]));
+                    String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(filePathColumn[2]));
+                    String mTitle = cursor.getString(cursor.getColumnIndexOrThrow(filePathColumn[3]));
                     Log.d("Main", "PerhapsFileName:" + perhapsFileName);
                     Log.d("Main", "perhaps mimeType:" + mimeType);
                     Log.d("Main", "the title??:" + mTitle);
@@ -119,7 +119,6 @@ public class ShareActivity extends Activity {
                         Log.d("Main", "not null");
                         new UploadTask().execute(filePath);
                     }
-
                 }
 
             }
@@ -137,7 +136,7 @@ public class ShareActivity extends Activity {
         cr.insert(PictureUploadProvider.CONTENT_URI, cv);
     }
 
-    private class DownloadPictureTask extends AsyncTask<String, Integer, UploadResult> {
+    private class DownloadPictureTask extends AsyncTask<String, Integer, DownloadResult> {
         private Context mContext;
         private Uri mUri;
 
@@ -147,72 +146,46 @@ public class ShareActivity extends Activity {
         }
 
         @Override
-        protected UploadResult doInBackground(String... input) {
+        protected DownloadResult doInBackground(String... input) {
             String filePath = input[0];
             String fileName = input[1];
-            boolean failed = mHandler.downloadPicture(mUri, fileName);
+            return mHandler.downloadPicture(mUri, fileName);
 
-            if (!failed) {
-                Log.d("Main", "Cool yo");
-
-                String newFilePath = ImageHandler.getDiskCacheDir(mContext, ImageHandler.DOWNLOAD_CACHE) + "/" + fileName;
-                Log.d("Main", "not failed and filePath:" + newFilePath);
-                return mHandler.uploadImage(prefs, newFilePath);
-
-            }
-
-            return null;
 
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            mBuilder.setContentText("Downloading image");
             mNotifyManager.notify(1, mBuilder.build());
         }
 
         @Override
-        protected void onPostExecute(UploadResult result) {
+        protected void onPostExecute(DownloadResult result) {
             super.onPostExecute(result);
 
             if (result != null) {
                 if (result.hasFailed()) {
-                    Toast.makeText(ShareActivity.this, R.string.upload_failed, Toast.LENGTH_LONG).show();
-                    SharedPreferences.Editor edit = prefs.edit();
-                    edit.putBoolean("recent_failed", true);
-                    edit.putString("failed_reason", result.getFailedReason());
-                    edit.commit();
+
+                    Toast.makeText(ShareActivity.this, R.string.download_failed, Toast.LENGTH_LONG).show();
+
                     //Update notification
                     mBuilder.setSmallIcon(R.drawable.ic_stat_alerts_and_states_error);
-                    mBuilder.setContentText("Upload failed")
+                    mBuilder.setContentText("Download failed")
                             // Removes the progress bar
                             .setProgress(0, 0, false);
                     mNotifyManager.notify(1, mBuilder.build());
                 } else {
-                    addToContentProvider(result);
 
-                    Toast.makeText(ShareActivity.this, R.string.upload_complete, Toast.LENGTH_LONG).show();
+
                     //Update notification
                     mBuilder.setSmallIcon(R.drawable.ic_stat_av_upload);
-                    mBuilder.setContentText("Upload complete")
+                    mBuilder.setContentText("Download complete")
                             // Removes the progress bar
                             .setProgress(0, 0, false);
                     mNotifyManager.notify(1, mBuilder.build());
-                    //Recent didnt fail.
-                    SharedPreferences.Editor edit = prefs.edit();
-                    edit.putBoolean("recent_failed", false);
-                    edit.putString("failed_reason", null);
-                    edit.commit();
-                    if (prefs.getBoolean("pref_tag", false)) {
-                        String url = prefs.getString("pref_url", null) + result.getmUrl();
-                        String shareUrl = prefs.getString("pref_tag_txt", "[img]%url[/img]").replace("%url", url);
-                        ClipData clip = ClipData.newPlainText("simple text", shareUrl);
-                        clipboard.setPrimaryClip(clip);
-                    } else {
-                        ClipData clip = ClipData.newPlainText("simple text", prefs.getString("pref_url", null) + result.getmUrl());
-                        clipboard.setPrimaryClip(clip);
-
-                    }
+                    //TODO call uploadtask with picture.
 
                 }
 
