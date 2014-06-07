@@ -1,7 +1,7 @@
 package com.github.davols.dasftp;
 
 /**
- * Created by morn on 07.06.14.
+ * Created by davols on 07.06.14.
  */
 public abstract class TaskResult {
     private boolean failed = false;

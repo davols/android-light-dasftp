@@ -65,7 +65,7 @@ public class ShareActivity extends Activity {
             mBuilder.setProgress(0, 0, false);
             if (Intent.ACTION_SEND.equals(action) && type != null) {
                 if (type.startsWith("image/")) {
-                    Toast.makeText(this, "Starting upload", Toast.LENGTH_LONG).show();
+
                     handleSendImage(intent); // Handle single image being sent
 
                 } else
@@ -114,7 +114,7 @@ public class ShareActivity extends Activity {
                     if (filePath == null) {
 
 
-                        new DownloadPictureTask(this, imageUri).execute(imageUri.getPath(), perhapsFileName);
+                        new DownloadPictureTask(imageUri).execute(imageUri.getPath(), perhapsFileName);
                     } else {
                         Log.d("Main", "not null");
                         new UploadTask().execute(filePath);
@@ -137,11 +137,11 @@ public class ShareActivity extends Activity {
     }
 
     private class DownloadPictureTask extends AsyncTask<String, Integer, DownloadResult> {
-        private Context mContext;
+
         private Uri mUri;
 
-        public DownloadPictureTask(Context context, Uri imgUri) {
-            mContext = context;
+        public DownloadPictureTask(Uri imgUri) {
+
             mUri = imgUri;
         }
 
@@ -157,6 +157,7 @@ public class ShareActivity extends Activity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            Toast.makeText(ShareActivity.this, "Starting download", Toast.LENGTH_LONG).show();
             mBuilder.setContentText("Downloading image");
             mNotifyManager.notify(1, mBuilder.build());
         }
@@ -185,7 +186,7 @@ public class ShareActivity extends Activity {
                             // Removes the progress bar
                             .setProgress(0, 0, false);
                     mNotifyManager.notify(1, mBuilder.build());
-                    //TODO call uploadtask with picture.
+                    new UploadTask().execute(result.getFilePath());
 
                 }
 

@@ -10,11 +10,6 @@ public class UploadResult extends TaskResult {
     private String uploadName;
     private String filePath;
 
-    public UploadResult(String failedReason, String mUrl) {
-        this.setmUrl(mUrl);
-        this.setFailedReason(failedReason);
-    }
-
     public UploadResult() {
         mUrl = null;
     }

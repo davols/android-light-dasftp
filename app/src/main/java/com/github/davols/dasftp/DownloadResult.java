@@ -9,10 +9,6 @@ public class DownloadResult extends TaskResult {
     private String uploadName;
     private String filePath;
 
-    public DownloadResult(String failedReason) {
-
-        this.setFailedReason(failedReason);
-    }
 
     public DownloadResult() {
 
