@@ -24,6 +24,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crittercism.app.Crittercism;
+
 public class MainActivity extends Activity implements AdapterView.OnItemClickListener {
 
     private TextView mTextView;
@@ -35,6 +37,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Crittercism.initialize(getApplicationContext(), "CRITTERCISM_APP_ID");
         setContentView(R.layout.activity_main);
         clipboard = (ClipboardManager)
                 getSystemService(Context.CLIPBOARD_SERVICE);
