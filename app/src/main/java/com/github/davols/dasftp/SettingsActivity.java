@@ -1,10 +1,15 @@
 package com.github.davols.dasftp;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.widget.Toast;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SettingsActivity extends Activity {
     private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10; // 10MB
@@ -20,7 +25,15 @@ public class SettingsActivity extends Activity {
                 .commit();
     }
 
-    public static class SettingsFragment extends PreferenceFragment {
+    public void doPositiveClick() {
+        Toast.makeText(this, R.string.nothing_saved, Toast.LENGTH_LONG).show();
+    }
+
+    public void doNegativeClick() {
+        Toast.makeText(this, R.string.nothing_saved, Toast.LENGTH_LONG).show();
+    }
+
+    public static class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -46,8 +59,55 @@ public class SettingsActivity extends Activity {
                     }
                 }
             });
-            //TODO trim() usernames, paths and hosts.
+            myPref = findPreference("pref_host");
+            myPref.setOnPreferenceChangeListener(this);
+            myPref = findPreference("pref_port");
+            myPref.setOnPreferenceChangeListener(this);
+            myPref = findPreference("pref_user");
+            myPref.setOnPreferenceChangeListener(this);
+        }
+
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            //Make sure the host is written correctly (no https/http if you put ip adress. ONLY IPV4 right now.
+            if (preference.getKey().equalsIgnoreCase("pref_host")) {
+                String myHost = preference.getSharedPreferences().getString("pref_host", null);
+                if (myHost != null) {
+                    Pattern p = Pattern.compile("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b");
+                    Matcher m = p.matcher(newValue.toString());
+
+                    if (m.find() && (newValue.toString().contains("http"))) {
+                        DialogFragment newFragment = MyAlertDialogFragment.newInstance(
+                                R.string.ip4_and_http_title, R.string.ip4_and_http);
+                        newFragment.show(getFragmentManager(), "dialog");
+                        return false;
+                    }
+
+                }
+
+
+            } else if (preference.getKey().equalsIgnoreCase("pref_user")) {
+                Pattern p = Pattern.compile("^\\s*(.*?)\\s*$");
+                Matcher m = p.matcher(newValue.toString());
+                if (m.matches()) {
+                    Toast.makeText(getActivity(), R.string.make_sure_username_is_correct, Toast.LENGTH_LONG).show();
+                }
+
+            } else if (preference.getKey().equalsIgnoreCase("pref_port")) {
+                //Make sure the port only contains digits.
+                Pattern pattern = Pattern.compile("^[0-9]+$");
+                Matcher m = pattern.matcher(newValue.toString());
+                if (!m.matches()) {
+                    DialogFragment newFragment = MyAlertDialogFragment.newInstance(
+                            R.string.number_port_title, R.string.number_port);
+                    newFragment.show(getFragmentManager(), "dialog");
+                    return false;
+                }
+            }
+            return true;
         }
 
     }
+
+
 }

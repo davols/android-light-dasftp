@@ -42,6 +42,16 @@
     <string name="clear_hist">Clear history</string>
     <string name="clear_hist_summ">Clear home history list and thumbnail cache</string>
 
+    <!--Alert dialogs -->
+    <string name="alert_dialog_ok">Ok</string>
+    <string name="alert_dialog_cancel">Cancel</string>
+    <string name="ip4_and_http_title">Incorret host</string>
+    <string name="ip4_and_http">If you write the host as an IP please do not include any http or https. Please retype the setting without http/https. </string>
+    <string name="nothing_saved">Preferences not saved, please redo them</string>
+    <string name="number_port_title">Invalid port</string>
+    <string name="number_port">Port number has to be a number and no other characters.</string>
+    <string name="make_sure_username_is_correct">Username seems to contain starting or ending space. Is this correct?</string>
+
     <!--Menu Stuff -->
     <string name="open_browser">Open in browser</string>
     <string name="copy">Copy</string>

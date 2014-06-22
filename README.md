@@ -6,7 +6,6 @@ Page: http://davols.github.io/android-light-dasftp
 
 ##TODOs
 - Being able to have several sites saved
-- More advanced error handling?
 - Upload pictures from picasa, flickr etc.
 
 ###V1
