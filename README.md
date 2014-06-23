@@ -2,6 +2,7 @@ android-light-dasftp
 ===================
 Small simple upload picture to sftp server and give direct link in clipboard. Clean and light, just one key press (share and app)
 [![build status](http://ci.gitb.it/projects/2/status.png?ref=master)](http://ci.gitb.it/projects/2?ref=master)
+
 Page: http://davols.github.io/android-light-dasftp
 
 
