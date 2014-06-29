@@ -23,7 +23,7 @@ public class DiskLruImageCache {
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
     private static final String TAG = "DiskLruImageCache";
-    private DiskLruCache mDiskCache;
+    private com.github.davols.dasftp.DiskLruCache mDiskCache;
     private Bitmap.CompressFormat mCompressFormat = Bitmap.CompressFormat.JPEG;
     private int mCompressQuality = 70;
 
@@ -31,7 +31,7 @@ public class DiskLruImageCache {
                              Bitmap.CompressFormat compressFormat, int quality) {
         try {
             final File diskCacheDir = getDiskCacheDir(context, uniqueName);
-            mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
+            mDiskCache = com.github.davols.dasftp.DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
             mCompressFormat = compressFormat;
             mCompressQuality = quality;
         } catch (IOException e) {
@@ -46,17 +46,17 @@ public class DiskLruImageCache {
         // otherwise use internal cache dir
         final String cachePath =
                 Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-                        !Util.isExternalStorageRemovable() ? Util.getExternalCacheDir(context).getPath() :
+                        !com.github.davols.dasftp.Util.isExternalStorageRemovable() ? com.github.davols.dasftp.Util.getExternalCacheDir(context).getPath() :
                         context.getCacheDir().getPath();
 
         return new File(cachePath + File.separator + uniqueName);
     }
 
-    private boolean writeBitmapToFile(Bitmap bitmap, DiskLruCache.Editor editor)
+    private boolean writeBitmapToFile(Bitmap bitmap, com.github.davols.dasftp.DiskLruCache.Editor editor)
             throws IOException, FileNotFoundException {
         OutputStream out = null;
         try {
-            out = new BufferedOutputStream(editor.newOutputStream(0), Util.IO_BUFFER_SIZE);
+            out = new BufferedOutputStream(editor.newOutputStream(0), com.github.davols.dasftp.Util.IO_BUFFER_SIZE);
             return bitmap.compress(mCompressFormat, mCompressQuality, out);
         } finally {
             if (out != null) {
@@ -67,7 +67,7 @@ public class DiskLruImageCache {
 
     public void put(String key, Bitmap data) {
 
-        DiskLruCache.Editor editor = null;
+        com.github.davols.dasftp.DiskLruCache.Editor editor = null;
         try {
             editor = mDiskCache.edit(key);
             if (editor == null) {
@@ -103,7 +103,7 @@ public class DiskLruImageCache {
     public Bitmap getBitmap(String key) {
 
         Bitmap bitmap = null;
-        DiskLruCache.Snapshot snapshot = null;
+        com.github.davols.dasftp.DiskLruCache.Snapshot snapshot = null;
         try {
 
             snapshot = mDiskCache.get(key);
@@ -113,7 +113,7 @@ public class DiskLruImageCache {
             final InputStream in = snapshot.getInputStream(0);
             if (in != null) {
                 final BufferedInputStream buffIn =
-                        new BufferedInputStream(in, Util.IO_BUFFER_SIZE);
+                        new BufferedInputStream(in, com.github.davols.dasftp.Util.IO_BUFFER_SIZE);
                 bitmap = BitmapFactory.decodeStream(buffIn);
             }
         } catch (IOException e) {
@@ -167,5 +167,6 @@ public class DiskLruImageCache {
     }
 
 }
+
 
 
