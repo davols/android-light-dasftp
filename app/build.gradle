@@ -1,12 +1,12 @@
 apply plugin: 'android'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.3"
+    compileSdkVersion 21
+    buildToolsVersion "21.0.0"
 
     defaultConfig {
         minSdkVersion 18
-        targetSdkVersion 19
+        targetSdkVersion 21
     }
 
     buildTypes {
@@ -20,4 +20,5 @@ android {
 dependencies {
     compile files('libs/jsch-0.1.51.jar')
     compile files('libs/crittercism_v4_5_1_sdkonly.jar')
+    compile "com.android.support:appcompat-v7:21.0.+"
 }

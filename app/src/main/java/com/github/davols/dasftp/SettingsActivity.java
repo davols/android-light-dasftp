@@ -8,8 +8,8 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.widget.Toast;
 
-import com.github.davols.dasftp.dasftp.DiskLruImageCache;
-import com.github.davols.dasftp.dasftp.MyAlertDialogFragment;
+import com.github.davols.dasftp.DiskLruImageCache;
+import com.github.davols.dasftp.MyAlertDialogFragment;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,8 +51,8 @@ public class SettingsActivity extends Activity {
                 public boolean onPreferenceClick(Preference preference) {
                     if (preference.getKey().equalsIgnoreCase("clear_hist")) {
                         if (getActivity() != null) {
-                            getActivity().getContentResolver().delete(com.github.davols.dasftp.dasftp.PictureUploadProvider.CONTENT_URI, null, null);
-                            com.github.davols.dasftp.dasftp.DiskLruImageCache mDiskLruCache = new DiskLruImageCache(getActivity(), DISK_CACHE_SUBDIR, DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
+                            getActivity().getContentResolver().delete(com.github.davols.dasftp.PictureUploadProvider.CONTENT_URI, null, null);
+                            com.github.davols.dasftp.DiskLruImageCache mDiskLruCache = new DiskLruImageCache(getActivity(), DISK_CACHE_SUBDIR, DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
                             mDiskLruCache.clearCache();
                         }
 
@@ -80,7 +80,7 @@ public class SettingsActivity extends Activity {
                     Matcher m = p.matcher(newValue.toString());
 
                     if (m.find() && (newValue.toString().contains("http"))) {
-                        DialogFragment newFragment = com.github.davols.dasftp.dasftp.MyAlertDialogFragment.newInstance(
+                        DialogFragment newFragment = com.github.davols.dasftp.MyAlertDialogFragment.newInstance(
                                 R.string.ip4_and_http_title, R.string.ip4_and_http);
                         newFragment.show(getFragmentManager(), "dialog");
                         return false;

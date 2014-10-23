@@ -3,6 +3,7 @@
 
     <string name="app_name">daSftp</string>
     <string name="hello_world">Hello world!</string>
+    <string name="crittercism_key">CHANGE_ME</string>
     <string name="upload_failed">Upload failed</string>
     <string name="upload_complete">Upload complete, added to clipboard</string>
     <string name="no_uploads">No recent uploads</string>
@@ -51,6 +52,7 @@
     <string name="number_port_title">Invalid port</string>
     <string name="number_port">Port number has to be a number and no other characters.</string>
     <string name="make_sure_username_is_correct">Username seems to contain starting or ending space. Is this correct?</string>
+    <string name="make_sure_path_is_correct">Path ends or starts with whitespace, not saved. </string>
 
     <!--Menu Stuff -->
     <string name="open_browser">Open in browser</string>
