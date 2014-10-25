@@ -57,7 +57,7 @@ public class ImageHandler {
 
     // Creates a unique subdirectory of the designated app cache directory. Tries to use external
 // but if not mounted, falls back on internal storage.
-    public static File getDiskCacheDir(Context context, String uniqueName) {
+    public static File getDiskCacheDir(Context context) {
         // Check if media is mounted or storage is built-in, if so, try and use external cache dir
         // otherwise use internal cache dir
         final String cachePath =
@@ -65,7 +65,7 @@ public class ImageHandler {
                         !isExternalStorageRemovable() ? getExternalCacheDir(context).getPath() :
                         context.getCacheDir().getPath();
 
-        return new File(cachePath + File.separator + uniqueName);
+        return new File(cachePath + File.separator + ImageHandler.DOWNLOAD_CACHE);
     }
 
     /**
@@ -73,19 +73,16 @@ public class ImageHandler {
      * Taken from http://developer.android.com/training/displaying-bitmaps/load-bitmap.html
      *
      * @param filePath  path to image file
-     * @param reqWidth  required width when scaled
-     * @param reqHeight required height when scaled
      * @return scaled bitmap
      */
-    private static Bitmap decodeSampledBitmapFromResource(String filePath,
-                                                          int reqWidth, int reqHeight) {
+    private static Bitmap decodeSampledBitmapFromResource(String filePath) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
         // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        options.inSampleSize = calculateInSampleSize(options, 200, 200);
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
@@ -210,10 +207,10 @@ public class ImageHandler {
             if (mDiskLruCache == null) {
                 Log.d(TAG, "LRU IS NULL");
             }
-            if (decodeSampledBitmapFromResource(path, 200, 200) == null) {
+            if (decodeSampledBitmapFromResource(path) == null) {
                 Log.d(TAG, "fucking pic is null but FilePath:" + path);
             }
-            mDiskLruCache.put(fileName + extension, decodeSampledBitmapFromResource(path, 200, 200));
+            mDiskLruCache.put(fileName + extension, decodeSampledBitmapFromResource(path));
 
 
         }
@@ -283,14 +280,14 @@ public class ImageHandler {
             HttpResponse response = client.execute(getRequest);
             InputStream stream = response.getEntity().getContent();
 
-            File dlCache = getDiskCacheDir(mContext, DOWNLOAD_CACHE);
+            File dlCache = getDiskCacheDir(mContext);
             if (!dlCache.exists()) {
                 dlCache.mkdir();
                 Log.d(TAG, "creating download cache");
             } else {
                 Log.d(TAG, "directory exists");
             }
-            String saveFilePath = getDiskCacheDir(mContext, DOWNLOAD_CACHE) + "/" + fileName;
+            String saveFilePath = getDiskCacheDir(mContext) + "/" + fileName;
 
 
             FileOutputStream fileOutputStream = new FileOutputStream(saveFilePath);
@@ -353,14 +350,14 @@ public class ImageHandler {
         try {
             InputStream inputStream = mContext.getContentResolver()
                     .openInputStream(Uri.parse(path));
-            File dlCache = getDiskCacheDir(mContext, DOWNLOAD_CACHE);
+            File dlCache = getDiskCacheDir(mContext);
             if (!dlCache.exists()) {
                 dlCache.mkdir();
                 Log.d(TAG, "creating download cache");
             } else {
                 Log.d(TAG, "directory exists");
             }
-            String saveFilePath = getDiskCacheDir(mContext, DOWNLOAD_CACHE) + "/" + fileName;
+            String saveFilePath = getDiskCacheDir(mContext) + "/" + fileName;
             BufferedOutputStream outStream = new BufferedOutputStream(
                     new FileOutputStream(saveFilePath));
             byte[] buf = new byte[2048];
@@ -393,14 +390,14 @@ public class ImageHandler {
 
         try {
 
-            File dlCache = getDiskCacheDir(mContext, DOWNLOAD_CACHE);
+            File dlCache = getDiskCacheDir(mContext);
             if (!dlCache.exists()) {
                 dlCache.mkdir();
                 Log.d(TAG, "creating download cache");
             } else {
                 Log.d(TAG, "directory exists");
             }
-            String saveFilePath = getDiskCacheDir(mContext, DOWNLOAD_CACHE) + "/" + fileName;
+            String saveFilePath = getDiskCacheDir(mContext) + "/" + fileName;
 
             ParcelFileDescriptor parcelFileDescriptor = mContext
                     .getContentResolver().openFileDescriptor(Uri.parse(path),

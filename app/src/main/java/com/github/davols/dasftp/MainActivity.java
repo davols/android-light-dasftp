@@ -12,6 +12,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -26,6 +27,10 @@ import android.widget.Toast;
 
 import com.crittercism.app.Crittercism;
 
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.SecretKey;
+
 public class MainActivity extends Activity implements AdapterView.OnItemClickListener {
 
     private TextView mTextView;
@@ -37,7 +42,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Crittercism.initialize(getApplicationContext(), "CRITTERCISM_APP_ID");
+        Crittercism.initialize(getApplicationContext(), getString(R.string.crittercism_key));
         setContentView(R.layout.activity_main);
         clipboard = (ClipboardManager)
                 getSystemService(Context.CLIPBOARD_SERVICE);
@@ -52,8 +57,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         mImg = (ImageView) findViewById(R.id.warning);
         mListView = (ListView) findViewById(R.id.list);
 //        query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
-        Cursor c = getContentResolver().query(PictureUploadProvider.CONTENT_URI, new String[]{PictureUploadProvider.KEY_ID, PictureUploadProvider.KEY_NAME, PictureUploadProvider.KEY_FILEPATH, PictureUploadProvider.KEY_URL, PictureUploadProvider.KEY_UPL_NAME, PictureUploadProvider.KEY_DATE_UPLOADED}, null, null, PictureUploadProvider.KEY_ID + " DESC");
-        mAdapter = new UploadCursorAdapter(this, c, true);
+        Cursor c = getContentResolver().query(daSftpProvider.CONTENT_URI_UPLOADS, new String[]{daSftpProvider.KEY_ID, daSftpProvider.KEY_NAME, daSftpProvider.KEY_FILEPATH, daSftpProvider.KEY_URL, daSftpProvider.KEY_UPL_NAME, daSftpProvider.KEY_DATE_UPLOADED}, null, null, daSftpProvider.KEY_ID + " DESC");
+        mAdapter = new UploadCursorAdapter(this, c);
         registerForContextMenu(mListView);
 
         mListView.setAdapter(mAdapter);
@@ -71,6 +76,28 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
             mListView.setVisibility(View.VISIBLE);
         }
         mListView.setOnItemClickListener(this);
+        SharedPreferences sp = getSharedPreferences("DASFTP", MODE_PRIVATE);
+        if (sp.getString("ENCODE",null) == null) {
+            SecretKey sk = null;
+            Log.d("prefs","doesnt have key");
+            try {
+                sk = Util.generateKey();
+                Log.d("prefs","generated key "+Base64.encodeToString(sk.getEncoded(),Base64.DEFAULT));
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            if (sk != null) {
+                SharedPreferences.Editor et = sp.edit();
+                et.putString("ENCODE", Base64.encodeToString(sk.getEncoded(), Base64.DEFAULT));
+                et.putString("ALGO", sk.getAlgorithm());
+                et.putString("FORMAT", sk.getFormat());
+                et.apply();
+            }
+        }
+        else
+        {
+            Log.d("prefs","has key");
+        }
     }
 
     @Override
@@ -93,9 +120,24 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
             }
         } else {
             mListView.setVisibility(View.GONE);
-            mTextView.setText(R.string.add_server);
             mTextView.setVisibility(View.VISIBLE);
             mImg.setVisibility(View.GONE);
+
+            Cursor c = getContentResolver().query(daSftpProvider.CONTENT_URI_SITES,
+                    new String[]{daSftpProvider.KEY_ID,daSftpProvider.KEY_URL,
+                                 daSftpProvider.KEY_PATH, daSftpProvider.KEY_USERNAME,
+                                 daSftpProvider.KEY_PASSWORD, daSftpProvider.KEY_PORT,
+                                  daSftpProvider.KEY_SIGNED, daSftpProvider.KEY_HOST}, null, null,
+                    daSftpProvider.KEY_ID + " DESC");
+
+            if (c.getCount() > 0)
+            {
+                mTextView.setText(R.string.select_default);
+            }
+            else
+            {
+                mTextView.setText(R.string.add_server);
+            }
         }
     }
 
@@ -138,7 +180,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         Cursor c = mAdapter.getCursor();
         c.moveToPosition(info.position);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String url = c.getString(c.getColumnIndex(PictureUploadProvider.KEY_URL));
+        String url = c.getString(c.getColumnIndex(daSftpProvider.KEY_URL));
         ClipData clip;
         if (url != null) {
             if (!url.startsWith("http://") && !url.startsWith("https://"))
@@ -174,7 +216,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         c.moveToPosition(i);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         int pref = Integer.parseInt(prefs.getString("pref_list", "0"));
-        String url = c.getString(c.getColumnIndex(PictureUploadProvider.KEY_URL));
+        String url = c.getString(c.getColumnIndex(daSftpProvider.KEY_URL));
         if (url != null) {
             if (!url.startsWith("http://") && !url.startsWith("https://"))
                 url = "http://" + url;
