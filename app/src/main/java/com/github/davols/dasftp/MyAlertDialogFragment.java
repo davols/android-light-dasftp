@@ -31,7 +31,7 @@ public class MyAlertDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.alert_dialog_ok,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                ((SettingsActivity) getActivity()).doPositiveClick();
+
                                 dialog.dismiss();
                             }
                         }
@@ -39,7 +39,7 @@ public class MyAlertDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.alert_dialog_cancel,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                ((SettingsActivity) getActivity()).doNegativeClick();
+
                                 dialog.dismiss();
                             }
                         }

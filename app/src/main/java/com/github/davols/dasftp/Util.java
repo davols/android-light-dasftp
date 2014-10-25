@@ -26,6 +26,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 /**
  * Junk drawer of utility methods.
@@ -35,8 +40,7 @@ final class Util {
     static final Charset US_ASCII = Charset.forName("US-ASCII");
     static final Charset UTF_8 = Charset.forName("UTF-8");
 
-    private Util() {
-    }
+
 
     static String readFully(Reader reader) throws IOException {
         try {
@@ -103,4 +107,14 @@ final class Util {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
     }
 
+    public static SecretKey generateKey() throws NoSuchAlgorithmException {
+        // Generate a 256-bit key
+        final int outputKeyLength = 256;
+
+        SecureRandom secureRandom = new SecureRandom();
+        // Do *not* seed secureRandom! Automatically seeded from system entropy.
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(outputKeyLength, secureRandom);
+        return keyGenerator.generateKey();
+    }
 }

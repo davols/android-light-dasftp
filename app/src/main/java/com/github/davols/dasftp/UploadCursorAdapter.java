@@ -24,8 +24,8 @@ public class UploadCursorAdapter extends CursorAdapter {
     private Typeface robotoLight;
     private DiskLruImageCache mDiskLruCache;
 
-    public UploadCursorAdapter(Context context, Cursor c, boolean autoRequery) {
-        super(context, c, autoRequery);
+    public UploadCursorAdapter(Context context, Cursor c) {
+        super(context, c, true);
         robotoReg = Typeface.createFromAsset(context.getAssets(), "fonts/robotoregular.ttf");
         robotoLight = Typeface.createFromAsset(context.getAssets(), "fonts/robotolight.ttf");
         mDiskLruCache = new DiskLruImageCache(context, DISK_CACHE_SUBDIR, DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
@@ -37,19 +37,16 @@ public class UploadCursorAdapter extends CursorAdapter {
      * Taken from http://developer.android.com/training/displaying-bitmaps/load-bitmap.html
      *
      * @param filePath
-     * @param reqWidth
-     * @param reqHeight
      * @return
      */
-    private static Bitmap decodeSampledBitmapFromResource(String filePath,
-                                                          int reqWidth, int reqHeight) {
+    private static Bitmap decodeSampledBitmapFromResource(String filePath) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
         // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        options.inSampleSize = calculateInSampleSize(options, 150, 150);
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
@@ -101,11 +98,11 @@ public class UploadCursorAdapter extends CursorAdapter {
         extra.setTypeface(robotoLight);
         ImageView thumbnail = (ImageView) view.findViewById(R.id.row_pic);
 
-        title.setText(cursor.getString(cursor.getColumnIndex(PictureUploadProvider.KEY_UPL_NAME)));
+        title.setText(cursor.getString(cursor.getColumnIndex(daSftpProvider.KEY_UPL_NAME)));
 
-        extra.setText(cursor.getString(cursor.getColumnIndex(PictureUploadProvider.KEY_URL)));
+        extra.setText(cursor.getString(cursor.getColumnIndex(daSftpProvider.KEY_URL)));
         Log.d("Main", "url:" + extra.getText().toString());
-        new FetchImageTask(thumbnail).execute(cursor.getString(cursor.getColumnIndex(PictureUploadProvider.KEY_NAME)), cursor.getString(cursor.getColumnIndex(PictureUploadProvider.KEY_FILEPATH)));
+        new FetchImageTask(thumbnail).execute(cursor.getString(cursor.getColumnIndex(daSftpProvider.KEY_NAME)), cursor.getString(cursor.getColumnIndex(daSftpProvider.KEY_FILEPATH)));
     }
 
     private class FetchImageTask extends AsyncTask<String, Integer, Bitmap> {
@@ -123,7 +120,7 @@ public class UploadCursorAdapter extends CursorAdapter {
             bm = mDiskLruCache.getBitmap(fileName);
             //If cache failed. Try to fetch it from path.
             if (bm == null && filePath != null) {
-                bm = decodeSampledBitmapFromResource(filePath, 150, 150);
+                bm = decodeSampledBitmapFromResource(filePath);
             }
             return bm;
 

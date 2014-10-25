@@ -6,12 +6,13 @@
     android:minHeight="?android:attr/listPreferredItemHeight">
 
     <ImageView
+        android:contentDescription="@string/content_description_thumbnail"
         android:id="@+id/row_pic"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_centerVertical="true"
         android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:scaleType="centerInside" />
 
@@ -20,19 +21,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/row_pic"
-        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
-        android:layout_toRightOf="@id/row_pic"
-        android:text="Title"
+        android:layout_toEndOf="@id/row_pic"
+
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/row_extra"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/row_title"
+        android:layout_alignStart="@id/row_title"
         android:layout_below="@id/row_title"
         android:layout_marginTop="5dp"
-        android:text="www.github.com" />
+         />
 
 </RelativeLayout>

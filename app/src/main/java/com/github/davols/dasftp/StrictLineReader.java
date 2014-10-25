@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 /**
- * Buffers input from an {@link InputStream} for reading lines.
+ * Buffers input from an {@link java.io.InputStream} for reading lines.
  * <p/>
  * <p>This class is used for buffered reading of lines. For purposes of this class, a line ends
  * with "\n" or "\r\n". End of input is reported by throwing {@code EOFException}. Unterminated
@@ -103,7 +103,7 @@ class StrictLineReader implements Closeable {
      * Closes the reader by closing the underlying {@code InputStream} and
      * marking this reader as closed.
      *
-     * @throws IOException for errors when closing the underlying {@code InputStream}.
+     * @throws java.io.IOException for errors when closing the underlying {@code InputStream}.
      */
     public void close() throws IOException {
         synchronized (in) {
@@ -119,8 +119,8 @@ class StrictLineReader implements Closeable {
      * this end of line marker is not included in the result.
      *
      * @return the next line from the input.
-     * @throws IOException  for underlying {@code InputStream} errors.
-     * @throws EOFException for the end of source stream.
+     * @throws java.io.IOException  for underlying {@code InputStream} errors.
+     * @throws java.io.EOFException for the end of source stream.
      */
     public String readLine() throws IOException {
         synchronized (in) {

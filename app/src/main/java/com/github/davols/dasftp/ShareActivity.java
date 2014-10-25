@@ -1,7 +1,6 @@
 package com.github.davols.dasftp;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationManager;
 import android.content.ClipData;
@@ -34,8 +33,6 @@ public class ShareActivity extends Activity {
     private static ClipboardManager clipboard;
     private static SharedPreferences prefs;
 
-    private DiskLruImageCache mDiskLruCache;
-
     private ImageHandler mHandler;
 
 
@@ -49,7 +46,7 @@ public class ShareActivity extends Activity {
         String type = intent.getType();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        mDiskLruCache = new DiskLruImageCache(this, DISK_CACHE_SUBDIR, DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
+        DiskLruImageCache mDiskLruCache = new DiskLruImageCache(this, DISK_CACHE_SUBDIR, DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
         mHandler = new ImageHandler(this, mDiskLruCache);
 
         if (hasPreferences()) {
@@ -58,7 +55,7 @@ public class ShareActivity extends Activity {
                     getSystemService(Context.CLIPBOARD_SERVICE);
             mNotifyManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            mBuilder = new Notification.Builder(this);
+            mBuilder = new Builder(this);
             mBuilder.setContentTitle("Picture Upload")
                     .setContentText("Upload in progress")
                     .setSmallIcon(R.drawable.ic_stat_av_upload);
@@ -128,12 +125,12 @@ public class ShareActivity extends Activity {
     private void addToContentProvider(UploadResult result) {
         ContentResolver cr = getContentResolver();
         ContentValues cv = new ContentValues();
-        cv.put(PictureUploadProvider.KEY_DATE_UPLOADED, Calendar.getInstance().getTimeInMillis());
-        cv.put(PictureUploadProvider.KEY_NAME, result.getName());
-        cv.put(PictureUploadProvider.KEY_URL, prefs.getString("pref_url", null) + result.getmUrl());
-        cv.put(PictureUploadProvider.KEY_UPL_NAME, result.getUploadName());
-        cv.put(PictureUploadProvider.KEY_FILEPATH, result.getFilePath());
-        cr.insert(PictureUploadProvider.CONTENT_URI, cv);
+        cv.put(daSftpProvider.KEY_DATE_UPLOADED, Calendar.getInstance().getTimeInMillis());
+        cv.put(daSftpProvider.KEY_NAME, result.getName());
+        cv.put(daSftpProvider.KEY_URL, prefs.getString("pref_url", null) + result.getmUrl());
+        cv.put(daSftpProvider.KEY_UPL_NAME, result.getUploadName());
+        cv.put(daSftpProvider.KEY_FILEPATH, result.getFilePath());
+        cr.insert(daSftpProvider.CONTENT_URI_UPLOADS, cv);
     }
 
     private class DownloadPictureTask extends AsyncTask<String, Integer, DownloadResult> {
@@ -218,7 +215,7 @@ public class ShareActivity extends Activity {
                     SharedPreferences.Editor edit = prefs.edit();
                     edit.putBoolean("recent_failed", true);
                     edit.putString("failed_reason", result.getFailedReason());
-                    edit.commit();
+                    edit.apply();
                     //Update notification
                     mBuilder.setSmallIcon(R.drawable.ic_stat_alerts_and_states_error);
                     mBuilder.setContentText("Upload failed")
@@ -239,7 +236,7 @@ public class ShareActivity extends Activity {
                     SharedPreferences.Editor edit = prefs.edit();
                     edit.putBoolean("recent_failed", false);
                     edit.putString("failed_reason", null);
-                    edit.commit();
+                    edit.apply();
                     if (prefs.getBoolean("pref_tag", false)) {
                         String url = prefs.getString("pref_url", null) + result.getmUrl();
                         String shareUrl = prefs.getString("pref_tag_txt", "[img]%url[/img]").replace("%url", url);
