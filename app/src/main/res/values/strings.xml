@@ -54,8 +54,8 @@
     <!-- Keys -->
     <string name="pref_ssh_key">SSH Keys</string>
     <string name="pref_ssh_key_summ">ssh keys</string>
-    <string name="pref_ssh_import">Import</string>
-    <string name="pref_ssh_import_summ">Import keys from storage</string>
+    <string name="pref_ssh_export">Import</string>
+    <string name="pref_ssh_export_summ">Import keys from storage</string>
     <string name="pref_ssh_generate">Generate</string>
     <string name="pref_ssh_generate_summ">Generate ssh keys</string>
     <string name="use_keys">Use SSH keys</string>

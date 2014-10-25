@@ -30,15 +30,17 @@
             <ListPreference
                 android:key="pref_keys"
                 android:title="@string/pref_ssh_key" />
-            <Preference
-                android:key="pref_import_ssh"
-                android:summary="@string/pref_ssh_import_summ"
-                android:title="@string/pref_ssh_import"/>
+
             <Preference
                 android:key="pref_generate_ssh"
                 android:summary="@string/pref_ssh_generate"
                 android:title="@string/pref_ssh_generate_summ"
              />
+            <Preference
+                android:enabled="false"
+                android:key="pref_export"
+                android:summary="@string/pref_ssh_export_summ"
+                android:title="@string/pref_ssh_export"/>
         </PreferenceScreen>
     </PreferenceCategory>
 
