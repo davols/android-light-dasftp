@@ -58,6 +58,7 @@
     <string name="pref_ssh_import_summ">Import keys from storage</string>
     <string name="pref_ssh_generate">Generate</string>
     <string name="pref_ssh_generate_summ">Generate ssh keys</string>
+    <string name="use_keys">Use SSH keys</string>
 
     <!-- Misc -->
     <string name="pref_tag_summ">Add tags to clipboard</string>
